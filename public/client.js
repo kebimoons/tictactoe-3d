@@ -5,14 +5,13 @@ let myRole = '', myRoom = '', myValue = 0;
 let ghostMesh = null;
 const tooltip = document.getElementById('coord-tooltip');
 
-// Referencias de Audio
 const snds = {
     move: document.getElementById('snd-move'),
     win: document.getElementById('snd-win'),
     bgm: document.getElementById('snd-bgm')
 };
 
-// --- 1. FONDO DINÁMICO DE ESTRELLAS ---
+// --- 1. FONDO DINÁMICO ---
 const bgScene = new THREE.Scene();
 const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const bgRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -33,7 +32,6 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(250, 250);
-// Importante: Se adjunta al target dentro del container
 document.getElementById('three-canvas-target').appendChild(renderer.domElement);
 
 const mainGroup = new THREE.Group();
@@ -53,49 +51,44 @@ function initThreeGrid() {
             }
         }
     }
+    // Inicializar Ghost Mesh (Previsualización)
+    const ghostGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const ghostMat = new THREE.MeshBasicMaterial({ 
+        color: 0xffffff, transparent: true, opacity: 0.4, wireframe: true 
+    });
+    ghostMesh = new THREE.Mesh(ghostGeo, ghostMat);
+    ghostMesh.visible = false;
+    mainGroup.add(ghostMesh);
 }
 
-// --- 3. LÓGICA DE INTERFAZ Y BOTONES ---
-
-// Unirse a sala
+// --- 3. BOTONES ---
 document.getElementById('joinBtn').onclick = () => {
     const code = document.getElementById('roomInput').value;
     if (code) {
         myRoom = code;
         snds.bgm.volume = 0.2;
-        snds.bgm.play().catch(() => console.log("Audio esperando interacción"));
+        snds.bgm.play().catch(() => {});
         socket.emit('joinRoom', code);
     }
 };
 
-// Minimizar/Maximizar Cubo 3D
 document.getElementById('toggle-3d').onclick = () => {
-    const container = document.getElementById('three-container');
-    container.classList.toggle('minimized');
-    // Cambiar el icono del botón
-    document.getElementById('toggle-3d').innerText = container.classList.contains('minimized') ? "+" : "_";
+    document.getElementById('three-container').classList.toggle('minimized');
 };
 
-// Reiniciar Juego (desde el modal de victoria)
-document.getElementById('retry-btn').onclick = () => {
-    socket.emit('restartGame', myRoom);
+document.getElementById('btn-minimize-modal').onclick = () => {
+    document.getElementById('overlay').classList.toggle('modal-minimized');
 };
 
-// Salir al menú principal
-const exitAction = () => {
-    socket.emit('leaveRoom', myRoom);
-    location.reload();
-};
+document.getElementById('retry-btn').onclick = () => socket.emit('restartGame', myRoom);
+
+const exitAction = () => { socket.emit('leaveRoom', myRoom); location.reload(); };
 document.getElementById('menu-btn').onclick = exitAction;
-document.getElementById('exit-btn').onclick = () => {
-    if(confirm("¿Estás seguro de que quieres abandonar la partida?")) exitAction();
-};
+document.getElementById('exit-btn').onclick = () => { if(confirm("¿Abandonar?")) exitAction(); };
 
-// --- 4. EVENTOS DE SOCKET ---
-
+// --- 4. SOCKETS ---
 socket.on('init', ({ board, role, turn, roomCode }) => {
-    myRole = role;
-    myValue = (role === 'P1') ? -1 : (role === 'P2' ? 1 : 0);
+    myRole = role; myValue = (role === 'P1') ? -1 : (role === 'P2' ? 1 : 0);
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('game-ui').style.display = 'block';
     document.getElementById('room-id').innerText = `SALA: ${roomCode}`;
@@ -104,87 +97,66 @@ socket.on('init', ({ board, role, turn, roomCode }) => {
 });
 
 socket.on('updateBoard', ({ board, turn, reset }) => {
-    if(reset) document.getElementById('overlay').classList.add('hidden');
+    if(reset) {
+        document.getElementById('overlay').classList.add('hidden');
+        document.getElementById('overlay').classList.remove('modal-minimized');
+    }
     snds.move.play().catch(() => {});
     updateUI(board, turn);
 });
 
-socket.on('errorMsg', (msg) => {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 2500);
-});
-
 socket.on('gameOver', ({ winnerId, board, winningLine }) => {
+    // 1. Mostrar resaltado ganador inmediatamente
     updateUI(board, 0, winningLine);
-    const overlay = document.getElementById('overlay');
-    const msg = document.getElementById('result-message');
-    overlay.classList.remove('hidden');
     
+    // 2. Esperar 4 segundos antes de mostrar el cartel
     setTimeout(() => {
         const overlay = document.getElementById('overlay');
         const msg = document.getElementById('result-message');
         overlay.classList.remove('hidden');
-        
         if (socket.id === winnerId) {
             snds.win.play();
             msg.innerText = "¡GANASTE!";
             msg.style.color = "var(--p1)";
         } else {
-            // Sonido de derrota si tienes uno, o simplemente el mensaje
             msg.innerText = "DERROTA";
             msg.style.color = "var(--p2)";
         }
-    }, 4000); // 4000 milisegundos = 4 segundos de gloria
+    }, 4000);
 });
 
-// --- 5. RENDERIZADO DE TABLEROS (2D Y 3D) ---
-
+// --- 5. RENDERIZADO ---
 function updateUI(board, turn, winningLine = []) {
     const container = document.getElementById('layers-container');
     container.innerHTML = '';
-    
     for (let y = 3; y >= 0; y--) {
-        const layerDiv = document.createElement('div');
-        layerDiv.className = 'layer';
-        layerDiv.innerHTML = `<h3>Nivel ${y + 1}</h3>`;
+        const layer = document.createElement('div');
+        layer.className = 'layer';
+        layer.innerHTML = `<h3>Nivel ${y + 1}</h3>`;
         const grid = document.createElement('div');
         grid.className = 'grid';
-
         for (let x = 0; x < 4; x++) {
             for (let z = 0; z < 4; z++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                const val = board[x][y][z];
-                
-                if (val === -1) { cell.innerText = 'X'; cell.style.color = 'var(--p1)'; }
-                if (val === 1) { cell.innerText = 'O'; cell.style.color = 'var(--p2)'; }
+                if (board[x][y][z] === -1) { cell.innerText = 'X'; cell.style.color = 'var(--p1)'; }
+                if (board[x][y][z] === 1) { cell.innerText = 'O'; cell.style.color = 'var(--p2)'; }
 
-                // Resaltado de línea ganadora
-                const isWinner = winningLine.some(c => c.x === x && c.y === y && c.z === z);
-                if (isWinner) {
+                if (winningLine.some(c => c.x === x && c.y === y && c.z === z)) {
                     cell.classList.add('win-highlight', 'win-flash-animation');
                 }
 
-                // --- EVENTOS DE CURSOR (HOVER) ---
                 cell.onmouseenter = () => {
-                    // 1. Mostrar Coordenadas
                     tooltip.innerText = `Pos: (${x}, ${y}, ${z})`;
                     tooltip.classList.remove('hidden');
-                    
-                    // 2. Mostrar posición en el Cubo 3D
                     ghostMesh.position.set(x - 1.5, y - 1.5, z - 1.5);
                     ghostMesh.visible = true;
-                    // Cambiar color del ghost según el turno
                     ghostMesh.material.color.set(myValue === -1 ? 0x00d4ff : 0xff4d4d);
                 };
-
                 cell.onmousemove = (e) => {
                     tooltip.style.left = e.clientX + 'px';
                     tooltip.style.top = e.clientY + 'px';
                 };
-
                 cell.onmouseleave = () => {
                     tooltip.classList.add('hidden');
                     ghostMesh.visible = false;
@@ -194,46 +166,30 @@ function updateUI(board, turn, winningLine = []) {
                 grid.appendChild(cell);
             }
         }
-        layerDiv.appendChild(grid);
-        container.appendChild(layerDiv);
+        layer.appendChild(grid);
+        container.appendChild(layer);
     }
-
-    // Actualizar Texto de Turno
     const turnDisplay = document.getElementById('turn-display');
-    if (myRole === 'Spectator') {
-        turnDisplay.innerText = "ESPECTADOR";
-    } else {
-        turnDisplay.innerText = (turn === myValue) ? "TU TURNO" : "ESPERANDO RIVAL";
-        turnDisplay.style.color = (turn === myValue) ? "var(--p1)" : "white";
-    }
-
-    // Actualizar Cubo 3D
+    turnDisplay.innerText = (turn === myValue) ? "TU TURNO" : "ESPERANDO RIVAL";
+    turnDisplay.style.color = (turn === myValue) ? "var(--p1)" : "white";
     update3D(board, winningLine);
 }
 
 function update3D(board, winningLine) {
-    // Limpiar solo las esferas
     const toRemove = mainGroup.children.filter(c => c.geometry && c.geometry.type === 'SphereGeometry');
     toRemove.forEach(s => mainGroup.remove(s));
-
-    for(let x=0; x<4; x++) {
-        for(let y=0; y<4; y++) {
-            for(let z=0; z<4; z++) {
-                if (board[x][y][z] !== 0) {
-                    const isWin = winningLine.some(c => c.x === x && c.y === y && c.z === z);
-                    const geo = new THREE.SphereGeometry(isWin ? 0.5 : 0.3, 16, 16);
-                    const color = isWin ? 0xffd700 : (board[x][y][z] === -1 ? 0x00d4ff : 0xff4d4d);
-                    const mat = new THREE.MeshBasicMaterial({ color });
-                    const s = new THREE.Mesh(geo, mat);
-                    s.position.set(x - 1.5, y - 1.5, z - 1.5);
-                    mainGroup.add(s);
-                }
-            }
+    for(let x=0; x<4; x++) for(let y=0; y<4; y++) for(let z=0; z<4; z++) {
+        if (board[x][y][z] !== 0) {
+            const isWin = winningLine.some(c => c.x === x && c.y === y && c.z === z);
+            const geo = new THREE.SphereGeometry(isWin ? 0.5 : 0.3, 16, 16);
+            const color = isWin ? 0xffd700 : (board[x][y][z] === -1 ? 0x00d4ff : 0xff4d4d);
+            const s = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color }));
+            s.position.set(x - 1.5, y - 1.5, z - 1.5);
+            mainGroup.add(s);
         }
     }
 }
 
-// --- 6. LOOPS DE ANIMACIÓN ---
 let mouseX = 0, mouseY = 0;
 window.addEventListener('mousemove', (e) => {
     mouseX = (e.clientX / window.innerWidth) - 0.5;
@@ -242,31 +198,15 @@ window.addEventListener('mousemove', (e) => {
 
 function animate() {
     requestAnimationFrame(animate);
-    
-    // Fondo
     starMesh.rotation.y += 0.001;
     starMesh.position.x += (mouseX * 0.3 - starMesh.position.x) * 0.05;
     starMesh.position.y += (-mouseY * 0.3 - starMesh.position.y) * 0.05;
     bgRenderer.render(bgScene, bgCamera);
-
-    // Mini Cubo
     mainGroup.rotation.y += 0.01;
     renderer.render(scene, camera);
 }
 
-initThreeGrid(
-    function initGhostMesh() {
-    const geo = new THREE.SphereGeometry(0.4, 16, 16);
-    const mat = new THREE.MeshBasicMaterial({ 
-        color: 0xffffff, 
-        transparent: true, 
-        opacity: 0.4,
-        wireframe: true 
-    });
-    ghostMesh = new THREE.Mesh(geo, mat);
-    ghostMesh.visible = false;
-    mainGroup.add(ghostMesh);
-});
+initThreeGrid();
 animate();
 
 window.addEventListener('resize', () => {
