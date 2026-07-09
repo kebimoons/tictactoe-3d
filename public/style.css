@@ -5,48 +5,85 @@
     --card-bg: rgba(10, 20, 40, 0.9);
 }
 
-body { margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+body { margin: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; color: white; overflow: hidden; }
 
+/* Fondo de Estrellas */
 #bg-canvas-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #101a30 0%, #050810 100%); }
 
+/* LOBBY (PANTALLA DE INICIO) - RESTAURADO */
 #lobby { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100; }
-.lobby-card { background: var(--card-bg); padding: 40px; border-radius: 25px; border: 2px solid var(--p1); text-align: center; backdrop-filter: blur(15px); width: 380px; box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); }
-.lobby-card h1 span { color: var(--p1); text-shadow: 0 0 10px var(--p1); }
-#student-credits { margin-top: 30px; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #8892b0; line-height: 1.6; }
+.lobby-card { 
+    background: var(--card-bg); 
+    padding: 50px; 
+    border-radius: 30px; 
+    border: 2px solid var(--p1); 
+    text-align: center; 
+    backdrop-filter: blur(15px); 
+    width: 450px;
+    box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
+}
+
+.lobby-card h1 { font-size: 2.8rem; margin-bottom: 30px; letter-spacing: 4px; }
+.lobby-card h1 span { color: var(--p1); text-shadow: 0 0 15px var(--p1); }
+
+/* Input y Botón del Lobby estilizados */
+.input-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; }
+input { 
+    padding: 15px; border-radius: 10px; border: 1px solid #333; 
+    background: rgba(0,0,0,0.5); color: white; font-size: 1rem; width: 150px; text-align: center;
+}
+#joinBtn { 
+    padding: 15px 25px; border-radius: 10px; border: none; 
+    background: var(--p1); color: white; font-weight: bold; 
+    cursor: pointer; transition: 0.3s; text-transform: uppercase;
+}
+#joinBtn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--p1); }
+
+#student-credits { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #8892b0; font-size: 0.9rem; line-height: 1.8; }
 #student-credits strong { color: var(--p1); }
 
+/* INTERFAZ DE JUEGO */
 #top-bar { position: absolute; top: 0; width: 100%; height: 70px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: space-around; z-index: 80; border-bottom: 1px solid rgba(0, 212, 255, 0.2); }
-#turn-display { font-size: 1.4rem; font-weight: bold; letter-spacing: 1px; }
+#turn-display { font-size: 1.4rem; font-weight: bold; }
 #exit-btn { background: var(--p2); color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
 #layers-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; height: 100vh; gap: 30px; padding-top: 40px; }
-.layer { background: rgba(255,255,255,0.03); padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; backdrop-filter: blur(5px); }
-.layer h3 { font-size: 0.8rem; text-align: center; margin-bottom: 10px; color: var(--p1); text-transform: uppercase; }
+.layer { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+.layer h3 { font-size: 0.8rem; text-align: center; color: var(--p1); margin-bottom: 10px; }
 .grid { display: grid; grid-template-columns: repeat(4, 55px); grid-template-rows: repeat(4, 55px); gap: 8px; }
-.cell { width: 55px; height: 55px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.8rem; font-weight: bold; border: 1px solid transparent; }
-.cell:hover { background: rgba(0, 212, 255, 0.15); border-color: var(--p1); transform: scale(1.05); }
+.cell { width: 55px; height: 55px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: 0.2s; }
+.cell:hover { background: rgba(0, 212, 255, 0.15); border: 1px solid var(--p1); transform: scale(1.05); }
 
-#three-container { position: absolute; bottom: 20px; right: 20px; width: 250px; height: 250px; border: 2px solid var(--p1); border-radius: 20px; background: rgba(0,0,0,0.85); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+/* VISUALIZADOR 3D */
+#three-container { position: absolute; bottom: 20px; right: 20px; width: 250px; height: 250px; border: 2px solid var(--p1); border-radius: 20px; background: rgba(0,0,0,0.85); transition: 0.5s; overflow: hidden; }
 #three-container.minimized { width: 50px; height: 50px; border-radius: 50%; }
-#toggle-3d { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; background: var(--p1); color: white; border: none; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 90; }
+#toggle-3d { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; background: var(--p1); color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 90; }
 
-#overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; display: flex; align-items: center; justify-content: center; transition: background 0.5s; }
-.modal { background: #0a0f1a; padding: 50px; border-radius: 30px; border: 3px solid var(--p1); text-align: center; position: relative; }
-#btn-minimize-modal { position: absolute; top: 15px; right: 15px; background: var(--p1); border: none; color: white; cursor: pointer; border-radius: 5px; width: 25px; }
+/* MODAL DE RESULTADO Y MINIMIZACIÓN */
+#overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; display: flex; align-items: center; justify-content: center; transition: 0.5s ease-in-out; }
+.modal { background: #0a0f1a; padding: 50px; border-radius: 30px; border: 3px solid var(--p1); text-align: center; position: relative; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#btn-minimize-modal { position: absolute; top: 15px; right: 15px; background: var(--p1); border: none; color: white; cursor: pointer; border-radius: 5px; width: 25px; height: 25px; font-weight: bold; }
 
-/* Modal Minimizado */
+/* ESTADO MINIMIZADO DEL MODAL (FÍSICO A LA ESQUINA) */
 #overlay.modal-minimized { background: rgba(0,0,0,0); pointer-events: none; }
-#overlay.modal-minimized .modal { transform: scale(0.6) translateY(400px) translateX(-400px); pointer-events: auto; opacity: 0.8; }
+#overlay.modal-minimized .modal { 
+    position: fixed; 
+    bottom: 20px; 
+    left: 20px; 
+    transform: scale(0.5); 
+    transform-origin: bottom left; 
+    pointer-events: auto; 
+    padding: 30px;
+    box-shadow: 0 0 30px var(--p1);
+}
 
 #result-message { font-size: 4rem; font-weight: 900; margin-bottom: 30px; }
 .modal-buttons { display: flex; gap: 20px; justify-content: center; }
-.modal-buttons button { padding: 12px 25px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-#retry-btn { background: var(--p1); color: white; }
-#menu-btn { background: transparent; color: white; border: 1px solid white; }
+#retry-btn { padding: 12px 25px; border-radius: 10px; border: none; background: var(--p1); color: white; font-weight: bold; cursor: pointer; }
+#menu-btn { padding: 12px 25px; border-radius: 10px; border: 1px solid white; background: transparent; color: white; cursor: pointer; }
 
-.win-highlight { background: gold !important; color: black !important; box-shadow: 0 0 20px gold; }
-.win-flash-animation { animation: winPulse 0.5s infinite alternate; }
+/* Tooltip y Otros */
+#coord-tooltip { position: fixed; pointer-events: none; background: rgba(0, 212, 255, 0.9); color: black; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; z-index: 1000; transform: translate(15px, 15px); }
+.win-highlight { background: gold !important; color: black !important; box-shadow: 0 0 20px gold; animation: winPulse 0.5s infinite alternate; }
 @keyframes winPulse { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(1.8); transform: scale(1.1); } }
-
-#coord-tooltip { position: fixed; pointer-events: none; background: rgba(0, 212, 255, 0.9); color: black; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; z-index: 1000; box-shadow: 0 0 10px rgba(0, 212, 255, 0.5); transform: translate(15px, 15px); }
 .hidden { display: none !important; }
