@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 
     socket.on('restartGame', (roomCode) => {
         if (rooms[roomCode]) {
-            rooms[roomCode].board = Array(4).fill().map(() => Array(4).fill().map(() => Array(4).fill(0)));
+            rooms[roomCode].board = Array(4).fill().map(() => Array(4).fill().map(() => Array(4).fill(0))),
             rooms[roomCode].turn = -1;
             rooms[roomCode].active = true;
             io.to(roomCode).emit('updateBoard', { board: rooms[roomCode].board, turn: rooms[roomCode].turn, reset: true });
@@ -71,32 +71,20 @@ io.on('connection', (socket) => {
 
     socket.on('leaveRoom', (roomCode) => {
         socket.leave(roomCode);
-        // Si la sala se queda vacía, la borramos
         const clients = io.sockets.adapter.rooms.get(roomCode);
         if (!clients || clients.size === 0) delete rooms[roomCode];
     });
 });
 
-/**
- * ALGORITMO MATEMÁTICO DE LAS 13 VARIACIONES
- * Verifica los 13 casos descritos por el profesor.
- */
 function checkWin(board, x, y, z, val) {
     const directions = [
-        [1,0,0], [0,1,0], [0,0,1],                // 1-3: Frontales (H, V, Prof)
-        [1,1,0], [1,-1,0],                         // 4-5: Diagonales Frontales
-        [0,1,1], [0,1,-1],                         // 6-7: Diagonales Verticales
-        [1,0,1], [1,0,-1],                         // 8-9: Diagonales Horizontales
-        [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1]     // 10-13: Diagonales Cruzadas
+        [1,0,0], [0,1,0], [0,0,1], [1,1,0], [1,-1,0], [0,1,1], [0,1,-1], 
+        [1,0,1], [1,0,-1], [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1]
     ];
-
     for (let [dx, dy, dz] of directions) {
         let line = [{x, y, z}];
-        // Buscar hacia adelante
         line = line.concat(getDirCoords(board, x, y, z, dx, dy, dz, val));
-        // Buscar hacia atrás
         line = line.concat(getDirCoords(board, x, y, z, -dx, -dy, -dz, val));
-
         if (line.length >= 4) return line;
     }
     return null;
