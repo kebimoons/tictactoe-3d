@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tic Tac Toe Pro</title>
+    <title>3D Tic Tac Toe - Kevin Dobras</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body>
+    <!-- Contenedor para el fondo dinámico -->
+    <div id="bg-canvas-container"></div>
+
     <div id="lobby">
         <div class="lobby-card animate__animated animate__backInDown">
             <h1>TIC TAC TOE <span>4x4x4</span></h1>
-            <p>Ingresa un código para crear o unirte a una sala</p>
             <input type="text" id="roomInput" placeholder="Código de Sala">
-            <button id="joinBtn">INGRESAR</button>
+            <button id="joinBtn">INGRESAR AL JUEGO</button>
+            
+            <!-- Información del Proyecto -->
+            <div id="project-info">
+                <p><strong>Estudiante:</strong> Kevin Dobras</p>
+                <p><strong>Profesor:</strong> Euclides Serracin</p>
+                <p><strong>Grupo:</strong> 1IL141</p>
+                <p><strong>Proyecto Final</strong></p>
+            </div>
         </div>
     </div>
 
     <div id="game-ui" style="display: none;">
         <div id="top-bar">
             <div id="role-badge">Cargando...</div>
-            <div id="turn-display">Esperando rival...</div>
-            <div id="room-id">SALA: -</div>
+            <div id="turn-display">Esperando...</div>
+            <div id="room-id">-</div>
         </div>
-
         <div id="layers-container"></div>
-        <div id="three-container"></div>
+        <div id="three-container">
+            <button id="toggle-3d">_</button>
+            <div id="three-canvas-target"></div>
+        </div>
     </div>
 
     <div id="overlay" class="hidden">
         <div id="result-message"></div>
-        <button onclick="location.reload()">VOLVER A JUGAR</button>
+        <button onclick="location.reload()">REINTENTAR</button>
     </div>
+
+    <!-- Audios (URLs de ejemplo funcionales) -->
+    <audio id="snd-move" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="snd-lose" src="https://assets.mixkit.co/active_storage/sfx/2510/2510-preview.mp3"></audio>
+    <audio id="snd-bgm" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" loop></audio>
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="importmap">

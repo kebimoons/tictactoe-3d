@@ -27,3 +27,74 @@ button:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--p1); }
 #result-message { font-size: 5rem; font-weight: 900; margin-bottom: 30px; }
 .win { color: var(--p1); text-shadow: 0 0 30px var(--p1); }
 .lose { color: var(--p2); text-shadow: 0 0 30px var(--p2); }
+
+/* Fondo dinámico */
+#bg-canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Detrás de todo */
+    background: #050810;
+}
+
+/* Información del Estudiante */
+#project-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+    font-size: 0.85rem;
+    color: #8892b0;
+    line-height: 1.4;
+}
+
+#project-info p { margin: 5px 0; }
+#project-info strong { color: var(--p1); }
+
+/* Ajuste del Lobby para que no tape el fondo */
+.lobby-card {
+    background: rgba(11, 15, 26, 0.8); /* Más transparente */
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+#three-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 250px;
+    height: 250px;
+    border: 2px solid var(--p1);
+    border-radius: 15px;
+    background: rgba(0,0,0,0.85);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 50;
+}
+
+#three-container.minimized {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+#toggle-3d {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    background: var(--p1);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 60;
+    font-weight: bold;
+}
+
+/* Ajuste para que las capas no se oculten */
+#layers-container {
+    overflow-y: auto;
+    max-height: 85vh;
+}

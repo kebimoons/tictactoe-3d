@@ -17,7 +17,7 @@ io.on('connection', (socket) => {
             rooms[roomCode] = {
                 board: Array(4).fill().map(() => Array(4).fill().map(() => Array(4).fill(0))),
                 players: [],
-                turn: -1, // Empieza P1 (-1)
+                turn: -1,
                 active: true
             };
         }
@@ -28,7 +28,13 @@ io.on('connection', (socket) => {
             const value = role === 'P1' ? -1 : 1;
             room.players.push({ id: socket.id, role, value });
             socket.join(roomCode);
+            
             socket.emit('init', { board: room.board, role, turn: room.turn, roomCode });
+            
+            // NUEVO: Si ya están los dos, avisar a todos para que empiece el juego
+            if (room.players.length === 2) {
+                io.to(roomCode).emit('updateBoard', { board: room.board, turn: room.turn });
+            }
         } else {
             socket.join(roomCode);
             socket.emit('init', { board: room.board, role: 'Spectator', turn: room.turn, roomCode });
