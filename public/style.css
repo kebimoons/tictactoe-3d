@@ -1,100 +1,260 @@
-:root { --p1: #00d4ff; --p2: #ff4d4d; --bg: #0b0f1a; }
-body { margin: 0; background: var(--bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
+:root { 
+    --p1: #00d4ff; 
+    --p2: #ff4d4d; 
+    --bg: #050810; 
+    --card-bg: rgba(10, 20, 40, 0.9);
+}
 
-/* Lobby */
-#lobby { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #1a2332 0%, #0b0f1a 100%); z-index: 100; }
-.lobby-card { background: rgba(255,255,255,0.05); padding: 50px; border-radius: 30px; border: 1px solid rgba(0,212,255,0.3); text-align: center; backdrop-filter: blur(10px); }
-h1 { font-size: 2.5rem; margin-bottom: 10px; letter-spacing: 2px; }
-h1 span { color: var(--p1); }
-input { padding: 15px; border-radius: 10px; border: none; outline: none; width: 250px; font-size: 1rem; margin-bottom: 20px; display: block; margin-inline: auto; }
-button { padding: 15px 30px; border-radius: 10px; border: none; background: var(--p1); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
-button:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--p1); }
+body { 
+    margin: 0; 
+    background: var(--bg); 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    color: white; 
+    overflow: hidden; 
+}
 
-/* Game UI */
-#top-bar { position: absolute; top: 0; width: 100%; padding: 20px; display: flex; justify-content: space-around; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); }
-#layers-container { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; height: 100vh; gap: 40px; padding-top: 50px; }
-.layer h3 { text-align: center; color: var(--p1); margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; }
-.grid { display: grid; grid-template-columns: repeat(4, 55px); grid-template-rows: repeat(4, 55px); gap: 8px; }
-.cell { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.8rem; border-radius: 8px; transition: 0.2s; }
-.cell:hover { background: rgba(0,212,255,0.2); border-color: var(--p1); }
-
-/* Visualizer 3D */
-#three-container { position: absolute; bottom: 30px; right: 30px; width: 280px; height: 280px; border: 2px solid var(--p1); border-radius: 20px; background: rgba(0,0,0,0.8); overflow: hidden; box-shadow: 0 0 30px rgba(0,212,255,0.2); }
-
-/* Overlay */
-#overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.hidden { display: none !important; }
-#result-message { font-size: 5rem; font-weight: 900; margin-bottom: 30px; }
-.win { color: var(--p1); text-shadow: 0 0 30px var(--p1); }
-.lose { color: var(--p2); text-shadow: 0 0 30px var(--p2); }
-
-/* Fondo dinámico */
+/* Contenedor del fondo de estrellas dinámico */
 #bg-canvas-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* Detrás de todo */
-    background: #050810;
+    z-index: -1;
+    background: radial-gradient(circle at center, #101a30 0%, #050810 100%);
 }
 
-/* Información del Estudiante */
-#project-info {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0, 212, 255, 0.2);
-    font-size: 0.85rem;
-    color: #8892b0;
-    line-height: 1.4;
+/* Pantalla de Inicio (Lobby) */
+#lobby { 
+    position: fixed; 
+    inset: 0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 100; 
 }
 
-#project-info p { margin: 5px 0; }
-#project-info strong { color: var(--p1); }
-
-/* Ajuste del Lobby para que no tape el fondo */
-.lobby-card {
-    background: rgba(11, 15, 26, 0.8); /* Más transparente */
-    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+.lobby-card { 
+    background: var(--card-bg); 
+    padding: 40px; 
+    border-radius: 25px; 
+    border: 2px solid var(--p1); 
+    text-align: center; 
+    backdrop-filter: blur(15px); 
+    width: 380px;
+    box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
 }
 
-#three-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 250px;
-    height: 250px;
-    border: 2px solid var(--p1);
-    border-radius: 15px;
-    background: rgba(0,0,0,0.85);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 50;
+.lobby-card h1 { font-size: 2.2rem; margin-bottom: 5px; letter-spacing: 3px; }
+.lobby-card h1 span { color: var(--p1); text-shadow: 0 0 10px var(--p1); }
+.lobby-card p { color: #8892b0; margin-bottom: 20px; font-size: 0.9rem; }
+
+input { 
+    padding: 15px; 
+    border-radius: 10px; 
+    border: 1px solid #333; 
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 80%; 
+    font-size: 1rem; 
+    margin-bottom: 20px; 
+    text-align: center;
 }
 
-#three-container.minimized {
-    width: 50px;
-    height: 50px;
+#joinBtn { 
+    padding: 15px 30px; 
+    border-radius: 10px; 
+    border: none; 
+    background: var(--p1); 
+    color: white; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    width: 90%; 
+    text-transform: uppercase;
+}
+
+#joinBtn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--p1); }
+
+/* Créditos del Proyecto Final */
+#student-credits { 
+    margin-top: 30px; 
+    font-size: 0.8rem; 
+    border-top: 1px solid rgba(255,255,255,0.1); 
+    padding-top: 20px; 
+    color: #8892b0; 
+    line-height: 1.6;
+}
+#student-credits strong { color: var(--p1); }
+
+/* Interfaz de Juego */
+#top-bar { 
+    position: absolute; 
+    top: 0; 
+    width: 100%; 
+    height: 70px; 
+    background: rgba(0,0,0,0.8); 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-around; 
+    z-index: 80; 
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+#turn-display { font-size: 1.4rem; font-weight: bold; letter-spacing: 1px; }
+
+#exit-btn { 
+    background: var(--p2); 
+    color: white; 
+    border: none; 
+    padding: 8px 20px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold;
+    transition: 0.3s;
+}
+#exit-btn:hover { background: #ff2222; transform: translateY(-2px); }
+
+/* Tableros 4x4x4 */
+#layers-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    gap: 30px; 
+    padding-top: 40px; 
+}
+
+.layer { 
+    background: rgba(255,255,255,0.03); 
+    padding: 15px; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    border-radius: 15px; 
+    backdrop-filter: blur(5px);
+}
+
+.layer h3 { font-size: 0.8rem; text-align: center; margin-bottom: 10px; color: var(--p1); text-transform: uppercase; }
+
+.grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 55px); 
+    grid-template-rows: repeat(4, 55px); 
+    gap: 8px; 
+}
+
+.cell { 
+    width: 55px; 
+    height: 55px; 
+    background: rgba(255,255,255,0.05); 
+    border-radius: 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    font-size: 1.8rem; 
+    font-weight: bold; 
+    transition: 0.2s;
+    border: 1px solid transparent;
+}
+
+.cell:hover { 
+    background: rgba(0, 212, 255, 0.15); 
+    border-color: var(--p1); 
+    transform: scale(1.05);
+}
+
+/* Cubo 3D Visualizer */
+#three-container { 
+    position: absolute; 
+    bottom: 20px; 
+    right: 20px; 
+    width: 250px; 
+    height: 250px; 
+    border: 2px solid var(--p1); 
+    border-radius: 20px; 
+    background: rgba(0,0,0,0.85); 
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+#three-container.minimized { 
+    width: 50px; 
+    height: 50px; 
     border-radius: 50%;
 }
 
-#toggle-3d {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 25px;
-    height: 25px;
-    background: var(--p1);
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    z-index: 60;
+#toggle-3d { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    width: 30px; 
+    height: 30px; 
+    background: var(--p1); 
+    color: white; 
+    border: none; 
+    border-radius: 50%; 
+    cursor: pointer; 
     font-weight: bold;
+    z-index: 90;
 }
 
-/* Ajuste para que las capas no se oculten */
-#layers-container {
-    overflow-y: auto;
-    max-height: 85vh;
+/* Modales y Mensajes */
+#overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.9); 
+    z-index: 200; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.modal { 
+    background: #0a0f1a; 
+    padding: 50px; 
+    border-radius: 30px; 
+    border: 3px solid var(--p1); 
+    text-align: center; 
+    box-shadow: 0 0 100px rgba(0, 212, 255, 0.3);
+}
+
+#result-message { font-size: 4rem; font-weight: 900; margin-bottom: 30px; }
+
+.modal-buttons { display: flex; gap: 20px; justify-content: center; }
+
+.modal-buttons button { 
+    padding: 12px 25px; 
+    border-radius: 10px; 
+    border: none; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+
+#retry-btn { background: var(--p1); color: white; }
+#menu-btn { background: transparent; color: white; border: 1px solid white; }
+
+#toast { 
+    position: fixed; 
+    bottom: 30px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    background: var(--p2); 
+    color: white; 
+    padding: 12px 30px; 
+    border-radius: 50px; 
+    font-weight: bold; 
+    z-index: 300; 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.hidden { display: none !important; }
+
+/* Resaltado de victoria en celdas 2D */
+.win-highlight {
+    background: gold !important;
+    color: black !important;
+    box-shadow: 0 0 20px gold;
 }
