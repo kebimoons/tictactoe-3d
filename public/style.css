@@ -258,3 +258,28 @@ input {
     color: black !important;
     box-shadow: 0 0 20px gold;
 }
+
+/* Tooltip de coordenadas que sigue al mouse */
+#coord-tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(0, 212, 255, 0.9);
+    color: black;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    transform: translate(15px, 15px); /* Desplazado del cursor */
+}
+
+/* Animación para el resaltado ganador antes del modal */
+.win-flash-animation {
+    animation: winPulse 0.5s infinite alternate;
+}
+
+@keyframes winPulse {
+    from { filter: brightness(1); transform: scale(1); }
+    to { filter: brightness(1.8); transform: scale(1.1); }
+}

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 const socket = io();
 let myRole = '', myRoom = '', myValue = 0;
+let ghostMesh = null;
+const tooltip = document.getElementById('coord-tooltip');
 
 // Referencias de Audio
 const snds = {
@@ -120,20 +122,26 @@ socket.on('gameOver', ({ winnerId, board, winningLine }) => {
     const msg = document.getElementById('result-message');
     overlay.classList.remove('hidden');
     
-    if (socket.id === winnerId) {
-        snds.win.play();
-        msg.innerText = "¡VICTORIA!";
-        msg.className = "win animate__animated animate__bounceIn";
-    } else {
-        msg.innerText = "DERROTA";
-        msg.className = "lose animate__animated animate__shakeX";
-    }
+    setTimeout(() => {
+        const overlay = document.getElementById('overlay');
+        const msg = document.getElementById('result-message');
+        overlay.classList.remove('hidden');
+        
+        if (socket.id === winnerId) {
+            snds.win.play();
+            msg.innerText = "¡GANASTE!";
+            msg.style.color = "var(--p1)";
+        } else {
+            // Sonido de derrota si tienes uno, o simplemente el mensaje
+            msg.innerText = "DERROTA";
+            msg.style.color = "var(--p2)";
+        }
+    }, 4000); // 4000 milisegundos = 4 segundos de gloria
 });
 
 // --- 5. RENDERIZADO DE TABLEROS (2D Y 3D) ---
 
 function updateUI(board, turn, winningLine = []) {
-    // Actualizar Tableros 2D
     const container = document.getElementById('layers-container');
     container.innerHTML = '';
     
@@ -153,11 +161,34 @@ function updateUI(board, turn, winningLine = []) {
                 if (val === -1) { cell.innerText = 'X'; cell.style.color = 'var(--p1)'; }
                 if (val === 1) { cell.innerText = 'O'; cell.style.color = 'var(--p2)'; }
 
-                // RESALTAR SI ES PARTE DE LA LÍNEA GANADORA
+                // Resaltado de línea ganadora
                 const isWinner = winningLine.some(c => c.x === x && c.y === y && c.z === z);
                 if (isWinner) {
-                    cell.classList.add('win-highlight', 'animate__animated', 'animate__flash');
+                    cell.classList.add('win-highlight', 'win-flash-animation');
                 }
+
+                // --- EVENTOS DE CURSOR (HOVER) ---
+                cell.onmouseenter = () => {
+                    // 1. Mostrar Coordenadas
+                    tooltip.innerText = `Pos: (${x}, ${y}, ${z})`;
+                    tooltip.classList.remove('hidden');
+                    
+                    // 2. Mostrar posición en el Cubo 3D
+                    ghostMesh.position.set(x - 1.5, y - 1.5, z - 1.5);
+                    ghostMesh.visible = true;
+                    // Cambiar color del ghost según el turno
+                    ghostMesh.material.color.set(myValue === -1 ? 0x00d4ff : 0xff4d4d);
+                };
+
+                cell.onmousemove = (e) => {
+                    tooltip.style.left = e.clientX + 'px';
+                    tooltip.style.top = e.clientY + 'px';
+                };
+
+                cell.onmouseleave = () => {
+                    tooltip.classList.add('hidden');
+                    ghostMesh.visible = false;
+                };
 
                 cell.onclick = () => socket.emit('makeMove', { x, y, z, roomCode: myRoom });
                 grid.appendChild(cell);
@@ -223,7 +254,19 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-initThreeGrid();
+initThreeGrid(
+    function initGhostMesh() {
+    const geo = new THREE.SphereGeometry(0.4, 16, 16);
+    const mat = new THREE.MeshBasicMaterial({ 
+        color: 0xffffff, 
+        transparent: true, 
+        opacity: 0.4,
+        wireframe: true 
+    });
+    ghostMesh = new THREE.Mesh(geo, mat);
+    ghostMesh.visible = false;
+    mainGroup.add(ghostMesh);
+});
 animate();
 
 window.addEventListener('resize', () => {
