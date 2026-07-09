@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tic Tac Toe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body>
+    <div id="lobby">
+        <div class="lobby-card animate__animated animate__backInDown">
+            <h1>TIC TAC TOE <span>4x4x4</span></h1>
+            <p>Ingresa un código para crear o unirte a una sala</p>
+            <input type="text" id="roomInput" placeholder="Código de Sala">
+            <button id="joinBtn">INGRESAR</button>
+        </div>
+    </div>
+
+    <div id="game-ui" style="display: none;">
+        <div id="top-bar">
+            <div id="role-badge">Cargando...</div>
+            <div id="turn-display">Esperando rival...</div>
+            <div id="room-id">SALA: -</div>
+        </div>
+
+        <div id="layers-container"></div>
+        <div id="three-container"></div>
+    </div>
+
+    <div id="overlay" class="hidden">
+        <div id="result-message"></div>
+        <button onclick="location.reload()">VOLVER A JUGAR</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+    <script type="module" src="client.js"></script>
+</body>
+</html>
